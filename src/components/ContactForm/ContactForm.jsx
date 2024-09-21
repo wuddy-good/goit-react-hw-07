@@ -1,53 +1,72 @@
-import React from "react";
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup";
-import css from "./ContactForm.module.css";
+import styles from './ContactForm.module.css';
+import { nanoid } from 'nanoid';
+import { useDispatch } from 'react-redux';
+import { addContact } from '../../redux/contactSlice';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 
-const ProfileValidationSchema = Yup.object().shape({
-  username: Yup.string()
+// Схема валідації
+const validationSchema = Yup.object().shape({
+  name: Yup.string()
     .required("Name is required")
-    .min(3, "Name must be at least 3 characters")
-    .max(50, "Name can't exceed 50 characters"),
-  tel: Yup.string()
+    .matches(
+      /^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$/,
+      "Invalid name format"
+    ),
+  number: Yup.string()
     .required("Number is required")
-    .min(3, "Number must be at least 3 characters")
-    .max(50, "Number can't exceed 50 characters"),
+    .matches(
+      /^\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/,
+      "Invalid phone number format"
+    ),
 });
 
-const ContactForm = ({ onSubmit }) => {
+const ContactForm = () => {
+  const dispatch = useDispatch();
+
   const handleSubmit = (values, { resetForm }) => {
-    onSubmit({
-      id: Date.now(),
-      name: values.username,
-      number: values.tel,
-    });
-    resetForm();
+    const newObj = {
+      id: nanoid(),
+      name: values.name,
+      number: values.number,
+    };
+    dispatch(addContact(newObj));
+    resetForm(); // Очищаємо форму після відправки
   };
 
   return (
     <Formik
-      initialValues={{
-        username: "",
-        tel: "",
-      }}
+      initialValues={{ name: '', number: '' }}
+      validationSchema={validationSchema}
       onSubmit={handleSubmit}
-      validationSchema={ProfileValidationSchema}
     >
-      <Form className={css.tagForm}>
-        <label className={css.capitalForm1}>
-          <span>Name</span>
-          <Field type="text" name="username" />
-        </label>
-        <ErrorMessage name="username" component="div" className={css.error} />
-        <label className={css.capitalForm2}>
-          <span>Number</span>
-          <Field type="tel" name="tel" />
-        </label>
-        <ErrorMessage name="username" component="div" className={css.error} />
-        <button type="submit" className={css.btnAdd}>
-          Add contact
-        </button>
-      </Form>
+      {() => (
+        <Form className={styles.form}>
+          <label>
+            <Field
+              className={styles.inputField}
+              placeholder="Name"
+              type="text"
+              name="name"
+            />
+            <ErrorMessage name="name" component="div" />
+          </label>
+
+          <label>
+            <Field
+              className={styles.inputField}
+              placeholder="Phone number"
+              type="tel"
+              name="number"
+            />
+            <ErrorMessage name="number" component="div" />
+          </label>
+
+          <button type="submit" className={styles.button}>
+            Add Contact
+          </button>
+        </Form>
+      )}
     </Formik>
   );
 };

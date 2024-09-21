@@ -1,9 +1,11 @@
-import React from "react";
-import { FaUser } from "react-icons/fa6";
-import { FaPhoneAlt } from "react-icons/fa";
+import { FaUser, FaPhoneAlt } from "react-icons/fa"; // Використовуйте одну версію для іконок
 import css from "./Contact.module.css";
+import { useDispatch } from 'react-redux';
+import { deleteContact } from '../../redux/contactSlice';
 
-function Contact({ name, number, deleteContacts, id }) {
+const Contact = ({ name, number, id }) => {
+  const dispatch = useDispatch(); // Ініціалізація dispatch
+
   return (
     <li>
       <div className={css.divPerson}>
@@ -18,7 +20,7 @@ function Contact({ name, number, deleteContacts, id }) {
           </div>
         </div>
 
-        <button type="button" onClick={() => deleteContacts(id)}>
+        <button type="button" onClick={() => dispatch(deleteContact(id))}>
           Delete
         </button>
       </div>
